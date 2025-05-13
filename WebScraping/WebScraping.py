@@ -5,10 +5,6 @@ import sys
 import os
 from bs4 import BeautifulSoup
 
-# Set the root directory as the working directory
-root_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, root_directory)
-
 from utils.LoggerBaseUtil import LoggerBaseUtil
 
 logger = LoggerBaseUtil.get_logger()
@@ -22,6 +18,7 @@ class WebScraping:
         Reads the HTML content, parses using BS4 and create json of:
         Title, Keyword, Tag, Author, URL, Abstract
         """
+        logger.info(f"Start Reading html: {url}")
         result = {}
         try:
             response = requests.get(url, verify=False)
