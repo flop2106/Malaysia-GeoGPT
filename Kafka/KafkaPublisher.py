@@ -1,14 +1,14 @@
 import json
 from kafka import KafkaProducer
-import KafkaSetup
+import Kafka.KafkaSetup as KafkaSetup
 import time
 
-from utils.LoggerBaseUtil import LoggerBaseUtil
+import utils.LoggerBaseUtil as LoggerBaseUtil
 
-logger = LoggerBaseUtil.get_logger()
+logger = LoggerBaseUtil.setup()
 
 
-def setupProducer(list_server: list[str] = ["localhost:9092"],
+def setupPublisher(list_server: list[str] = ["localhost:9092"],
                   encoder: str = "utf-8") -> KafkaProducer:
     return (
     KafkaProducer(
@@ -41,7 +41,7 @@ def publish(producer: KafkaProducer, topic: str, key: str, payload: dict)-> None
 if __name__ == "__main__":
     working_server = KafkaSetup.setup()
     #time.sleep(2)
-    setup = setupProducer(list_server = [working_server])
+    setup = setupPublisher(list_server = [working_server])
     
 
     # example messages

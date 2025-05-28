@@ -1,15 +1,15 @@
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError, KafkaTimeoutError
 import time
-from utils.LoggerBaseUtil import LoggerBaseUtil
+import utils.LoggerBaseUtil as LoggerBaseUtil
 
-logger = LoggerBaseUtil.get_logger()
+logger = LoggerBaseUtil.setup()
 
 def setup(listServer: list[str] = ["localhost:9092",],
-          clientId: str = "admin_demo",
-          topicName: list[str] = ["news.economy", "price.economy", "news.technology", "price.technology"],
-          topicPartitions: list[int] = [1,1,1,1],
-          topicRF: list[int] = [1,1,1,1]) -> None:
+          clientId: str = "GeoGPT",
+          topicName: list[str] = ["scraper","embed","save"],
+          topicPartitions: list[int] = [2,2,1],
+          topicRF: list[int] = [1,1,1 ]) -> None:
           
     topics = []
     for idx, val in enumerate(topicName):
