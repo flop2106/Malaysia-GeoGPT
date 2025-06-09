@@ -5,11 +5,11 @@ import utils.LoggerBaseUtil as LoggerBaseUtil
 
 logger = LoggerBaseUtil.setup()
 
-def setup(listServer: list[str] = ["localhost:9092",],
+def setup(listServer: list[str] = ["localhost:9092"],
           clientId: str = "GeoGPT",
-          topicName: list[str] = ["scraper","embed","save"],
-          topicPartitions: list[int] = [2,2,1],
-          topicRF: list[int] = [1,1,1 ]) -> None:
+          topicName: list[str] = ["scraper"],
+          topicPartitions: list[int] = [1],
+          topicRF: list[int] = [1]) -> None:
           
     topics = []
     for idx, val in enumerate(topicName):

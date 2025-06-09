@@ -2,9 +2,9 @@ import threading
 import json
 from kafka import KafkaConsumer
 import time
-from utils.LoggerBaseUtil import LoggerBaseUtil
+import utils.LoggerBaseUtil as LoggerBaseUtil
 
-logger = LoggerBaseUtil.get_logger()
+logger = LoggerBaseUtil.setup()
 
 
 def safe_json_deserializer(m):

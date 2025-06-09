@@ -46,5 +46,10 @@ def test_LLM():
 def test_embedding():
     test = Embedding()
     print(test.execute("Hello Vector!"))
-#test_LLM()
-test_embedding()
+
+def test_initial_pipeline():
+    #test_kafka()
+    embedding = Embedding()
+    embedding.embedding_sequence()
+
+test_initial_pipeline()
