@@ -7,6 +7,8 @@ from Kafka.KafkaPublisher import publish
 from Database.SqlLiteSetup import PaperTable,EmbeddingsTable
 import json
 import utils.LoggerBaseUtil as LoggerBaseUtil
+import threading
+import queue
 logger = LoggerBaseUtil.setup()
 
 class Embedding(BaseLLM):
@@ -15,8 +17,32 @@ class Embedding(BaseLLM):
         self.api_url = "https://api.openai.com/v1/embeddings"
         self.model = "text-embedding-3-small"
         PaperTable.initialize_table()
-        EmbeddingsTable.initialize_table
+        EmbeddingsTable.initialize_table()
+        self.msg_queue = queue.Queue()
     
+    def worker(self):
+        while True:
+            msg = self.msg_queue.get()
+            if msg is None:
+                break
+            self.process_message(msg)
+    
+    def embedding_sequence(self):
+        consumer = consume_topics(["scraper"], "scraper-group", pubsub = False)
+
+        #start worker thread
+        t = threading.Thread(target = self.worker)
+        t.start()
+
+        try:
+            for message in consumer:
+                self.msg_queue.put(message)
+        except KeyboardInterrupt:
+            logger.info("Interrupted by user.")
+        finally:
+            self.msg_queue.put(None)
+            t.join()
+        
     def execute(self, input: str):
 
         request_body = {
@@ -28,18 +54,15 @@ class Embedding(BaseLLM):
 
         return response['data'][0]['embedding']
     
-    def embedding_sequence(self):
-
-        list_of_reports = consume_topics(["scraper"],"scraper-group")
-        print(x for x in list_of_reports)
-        for message in list_of_reports:
-            logger.info(f"This is the result: {message.topic} | {message.key}: {message.value}")
-            #data = json.loads(message.value)
-            data = message.value
-            logger.info(f"Process For {data['title']}")
-            logger.info("Inserting into SQLLite")
+    def process_message(self, message):
+        logger.info(f"This is the result: {message.topic} | {message.key}: {message.value}")
+        #data = json.loads(message.value)
+        data = message.value
+        logger.info(f"Process For {data['title']}")
+        logger.info("Inserting into SQLLite")
+        try:
             PaperTable.insert_paper(data['title'],
-                                        data['authors'],
+                                        data['authors'].replace(",",""),
                                         data['url'],
                                         data['abstract']
                                         
@@ -53,11 +76,13 @@ class Embedding(BaseLLM):
                         'Title': {data["title"]},
                         'Authors': {data["authors"]},
                         'Abstract': {data["abstract"]}
-                         """)
+                            """)
             logger.info("Save Embedding in SQLLite")
             import numpy as np
             EmbeddingsTable.insert_embeddings(paper_id, np.array(embedding_result))
-            logger.info("Completed!")                
+            logger.info("Completed!")
+        except:
+            logger.info("Fail!")                
 
 
 if __name__ == "__main__":

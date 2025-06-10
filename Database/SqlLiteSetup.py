@@ -1,12 +1,16 @@
 from sqlalchemy import text, create_engine
-
+import utils.LoggerBaseUtil as LoggerBaseUtil
+logger = LoggerBaseUtil.setup()
 DATABASE_URL = 'sqlite:///GeoGPT.db'
 engine = create_engine(DATABASE_URL)
 #Base = declarative_base(engine)
-def execute_sql(statement):
+def execute_sql(statement, parameters = None):
     with engine.connect() as connection:
-        result = connection.execute(text(statement))
-        if 'select' in statement.lower():
+        if parameters:
+            result = connection.execute(statement, parameters)
+        else:
+            result = connection.execute(text(statement))
+        if 'select' in str(statement).lower():
             result = result.fetchall()
         else:
             connection.commit()
@@ -33,6 +37,7 @@ class PaperTable:
 
     @staticmethod
     def initialize_table():
+        logger.info("Initialize Table listpaper")
         init_table_statement = """
                                 CREATE TABLE IF NOT EXISTS listpaper (
                                 paper_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +62,7 @@ class PaperTable:
 class EmbeddingsTable:
     @staticmethod
     def initialize_table():
-
+        logger.info("Initialize Table embeddings")
         init_table_statement = """
                                CREATE TABLE IF NOT EXISTS embeddings (
                                    embeddings_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,8 +74,8 @@ class EmbeddingsTable:
         execute_sql(init_table_statement)
     @staticmethod
     def insert_embeddings(paper_id, embedding):
-        adding_item("embeddings", "embedding, paper_id", f"{embedding.tobytes()}, {paper_id}")
-
+        sql = text("INSERT INTO embeddings (embedding, paper_id) VALUES(:embedding, :paper_id)")
+        execute_sql(sql, {"embedding": embedding.tobytes(), "paper_id": paper_id})
 
 if __name__ == '__main__':
-    pass
+    execute_sql("SELECT * FROM embeddings LIMIT 5")
