@@ -23,12 +23,6 @@ class BaseWebScrapper(ABC):
         Extract The HTML Result
         """
 
-    def vector_search(self, embedding:list, query:str) -> list:
-        """
-        Perform vector search using the embedding and query
-        """
-        pass
-
 if __name__=="__main__":
     logger.info("test")
     

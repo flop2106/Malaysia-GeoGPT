@@ -77,14 +77,6 @@ class UMWebScrapper(BaseWebScrapper):
                         logger.error(f"Error for {keys}, {url}: {e}")
                         repeat+=1
 
-                
-
-    def vector_search(self, embedding:list, query:str) -> list:
-        """
-        Perform vector search using the embedding and query
-        """
-        pass
-
 if __name__=="__main__":
     logger.info("test")
     um_xml = r"https://eprints.um.edu.my/cgi/exportview/subjects/QE/RSS2/QE.xml"

@@ -4,6 +4,7 @@ logger = LoggerBaseUtil.setup()
 DATABASE_URL = 'sqlite:///GeoGPT.db'
 engine = create_engine(DATABASE_URL)
 #Base = declarative_base(engine)
+
 def execute_sql(statement, parameters = None):
     with engine.connect() as connection:
         if parameters:
@@ -33,6 +34,12 @@ def delete_item(table_name, condition):
     execute_sql(delete_item_statement)
     print(f'Rows deleted from {table_name}')
 
+def get_all(table_name:str, condition:str = None) -> execute_sql:
+    if condition == None:
+        return execute_sql(f"SELECT * FROM {table_name}")
+    return execute_sql(f"SELECT * FROM {table_name} WHERE {condition}")
+
+
 class PaperTable:
 
     @staticmethod
@@ -58,6 +65,10 @@ class PaperTable:
         paper_id =  execute_sql(f"SELECT max(paper_id) FROM listpaper")
         
         return paper_id[0][0]
+    @staticmethod
+    def get_all():
+        sql = text("SELECT * FROM listpaper")
+        return execute_sql(sql)
 
 class EmbeddingsTable:
     @staticmethod

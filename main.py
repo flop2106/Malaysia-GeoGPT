@@ -8,6 +8,7 @@ from Kafka.KafkaPublisher import setupPublisher
 from LLM.Chat import Chat
 from LLM.Embedding import Embedding
 from LLM.BaseLLM import BaseLLM
+from Database.SqlLiteSetup import execute_sql
 import threading
 logger = LoggerBaseUtil.setup()
 logger.info("Start!")
@@ -52,4 +53,13 @@ def test_initial_pipeline():
     embedding = Embedding()
     embedding.embedding_sequence()
 
-test_initial_pipeline()
+def test_query():
+    logger.info("Check listpaper")
+    result_paper = execute_sql("SELECT COUNT(*) FROM listpaper")
+    logger.info(result_paper[0][0])
+    logger.info("Check embedding")
+    result_embeddings = execute_sql("SELECT COUNT(*) FROM embeddings")
+    logger.info(result_embeddings[0][0])
+    assert result_paper == result_embeddings
+
+test_query()
