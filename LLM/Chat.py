@@ -8,22 +8,39 @@ class Chat(BaseLLM):
         self.model = "gpt-4o-mini"
         self.history = []
 
-    def execute(self, message:str, role:str = ""):
+    def execute(self, message:str, role:str = "", old_message:str = None):
         messages = []
         if len(self.history) != 0:
             messages = self.history[-1]
-        
-        new_messages = [
-            {
-                "role": "system",
-                "content": role
-            }
-            ,
-            {
-                "role": "user",
-                "content": message
-            }
-        ]
+        if old_message == None:
+            new_messages = [
+                {
+                    "role": "system",
+                    "content": role
+                }
+                ,
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
+        else:
+            new_messages = [
+                {
+                    "role": "system",
+                    "content": role
+                }
+                ,
+                {
+                    "role": "user",
+                    "content": old_message
+                }
+                ,
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
         messages.extend(new_messages)
         request_body = {
             "model": self.model,

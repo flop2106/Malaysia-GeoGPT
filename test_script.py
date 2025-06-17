@@ -9,6 +9,7 @@ from LLM.Chat import Chat
 from LLM.Embedding import Embedding
 from LLM.BaseLLM import BaseLLM
 from Database.SqlLiteSetup import execute_sql
+from LLM.VectorSearch import VectorSearch
 import threading
 logger = LoggerBaseUtil.setup()
 logger.info("Start!")
@@ -62,4 +63,37 @@ def test_query():
     logger.info(result_embeddings[0][0])
     assert result_paper == result_embeddings
 
-test_query()
+def test_vector_search():
+    logger.info("Start Vector Search")
+    vector_search = VectorSearch()
+    query = "Tell me the list of paper with balingian province chemistry and provide an overview on its geochemistry"
+    result_list = vector_search.execute(query)
+    logger.info(result_list)
+    return result_list, query
+
+def test_vector_search_and_summarize():
+    result_list, query = test_vector_search()
+    # prep the list into str
+    result_str = ""
+    for res in result_list:
+        result_str = (result_str + "title: " + res[1] +
+                      "author: " +  res[2] + "url: " + res[3]
+                      + "abstract: " + res[4] +"\n"
+        ) 
+    prompt = f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
+    role = """a geology data calatog experts for malaysia. 
+                       ONLY USE THE DATA PROVIDED AND AVOID USE YOUR OWN KNOWLEDGE. 
+                       ENSURE AT THE BOTTOM OF YOUR RESPONSE ADD THE TITLE AND URL THAT YOU USE FOR REFERENCE.
+                       YOU ARE FOUND TO ALWAYS GET MIXED UP ON GEOGRAPHY LIKE SARAWAK IN PERAK. ENSURE YOU GOT THIS RIGHT WHEN GIVING ANSWER.
+                       """
+    chat = Chat()
+    result = chat.execute(prompt, role)
+    #interrogate
+    print("\n" + result)
+    print(chat.execute(str(input("Add your interrogation: ")), role, result))
+
+
+    
+
+test_vector_search_and_summarize()
+#test_initial_pipeline()
