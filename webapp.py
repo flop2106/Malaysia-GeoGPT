@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from LLM.VectorSearch import VectorSearch
 from LLM.Chat import Chat
+from uuid import uuid4
+
+# In-memory store for session data to keep cookies small
+SESSION_STORE = {}
 
 app = Flask(__name__)
 app.secret_key = 'change-me'
@@ -10,28 +14,45 @@ ROLE = """a geology data calatog experts for malaysia. \
                        ENSURE AT THE BOTTOM OF YOUR RESPONSE ADD THE TITLE AND URL THAT YOU USE FOR REFERENCE. \
                        YOU ARE FOUND TO ALWAYS GET MIXED UP ON GEOGRAPHY LIKE SARAWAK IN PERAK. ENSURE YOU GOT THIS RIGHT WHEN GIVING ANSWER.\n                       """
 
+def _init_store(sid):
+    SESSION_STORE[sid] = {
+        'history': [],
+        'results': None,
+        'last_answer': None
+    }
+
 def reset_session():
-    session['history'] = []
-    session['results'] = None
-    session['last_answer'] = None
+    sid = session.get('sid')
+    if sid and sid in SESSION_STORE:
+        del SESSION_STORE[sid]
+    sid = str(uuid4())
+    session['sid'] = sid
+    _init_store(sid)
+
+def _get_store():
+    sid = session.get('sid')
+    if not sid or sid not in SESSION_STORE:
+        reset_session()
+        sid = session['sid']
+    return SESSION_STORE[sid]
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'history' not in session:
-        reset_session()
+    store = _get_store()
     if request.method == 'POST':
         if 'reset' in request.form:
             reset_session()
             return redirect(url_for('index'))
         # follow-up question
-        if session.get('results') and 'interrogate' in request.form:
+        if store.get('results') and 'interrogate' in request.form:
             interrogation = request.form.get('interrogation')
-            previous = session.get('last_answer')
+            previous = store.get('last_answer')
             chat = Chat()
             answer = chat.execute(interrogation, ROLE, previous)
-            session['history'].append(('user', interrogation))
-            session['history'].append(('assistant', answer))
-            session['last_answer'] = answer
+            store['history'].append(('user', interrogation))
+            store['history'].append(('assistant', answer))
+            store['last_answer'] = answer
             return redirect(url_for('index'))
         # new query
         query = request.form.get('query')
@@ -40,7 +61,7 @@ def index():
             results = vs.execute(query)
             # Convert SQLAlchemy Row objects to tuples so they can be stored in the session
             results = [tuple(row) for row in results]
-            session['results'] = results
+            store['results'] = results
             result_str = ""
             for res in results:
                 result_str += (
@@ -50,11 +71,11 @@ def index():
             prompt = f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
             chat = Chat()
             answer = chat.execute(prompt, ROLE)
-            session['history'].append(('user', query))
-            session['history'].append(('assistant', answer))
-            session['last_answer'] = answer
+            store['history'].append(('user', query))
+            store['history'].append(('assistant', answer))
+            store['last_answer'] = answer
             return redirect(url_for('index'))
-    return render_template('index.html', history=session.get('history'), results=session.get('results'))
+    return render_template('index.html', history=store.get('history'), results=store.get('results'))
 
 if __name__ == '__main__':
     app.run(debug=True)
