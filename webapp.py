@@ -38,6 +38,8 @@ def index():
         if query:
             vs = VectorSearch()
             results = vs.execute(query)
+            # Convert SQLAlchemy Row objects to tuples so they can be stored in the session
+            results = [tuple(row) for row in results]
             session['results'] = results
             result_str = ""
             for res in results:
