@@ -16,7 +16,7 @@
                     {% for role, content in history %}
                         <div class="mb-2">
                             <span class="fw-bold text-primary">{{ role.capitalize() }}:</span>
-                            <span>{{ content }}</span>
+                            <div style="white-space: pre-wrap;" class="d-inline">{{ content }}</div>
                         </div>
                     {% endfor %}
                 {% else %}
@@ -42,19 +42,18 @@
         </div>
         <div class="col-md-4 border-start">
             <h5>Search Results</h5>
-            <ul class="list-unstyled">
+            <ol class="ps-3">
                 {% if results %}
                     {% for row in results %}
                         <li class="mb-3">
                             <a href="{{ row[2] }}" target="_blank" class="fw-semibold">{{ row[1] }}</a><br>
                             <small class="text-muted">Author: {{ row[3] }}</small>
-                            <p class="mb-0">{{ row[4] }}</p>
                         </li>
                     {% endfor %}
                 {% else %}
                     <li class="text-muted">No results yet.</li>
                 {% endif %}
-            </ul>
+            </ol>
         </div>
     </div>
 </div>
