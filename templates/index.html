@@ -37,7 +37,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Search</button>
                 {% endif %}
-                <button type="submit" name="reset" class="btn btn-secondary ms-2">Reset</button>
+                <button type="submit" name="reset" class="btn btn-secondary ms-2" formnovalidate>Reset</button>
             </form>
         </div>
         <div class="col-md-4 border-start">
@@ -57,13 +57,5 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var chatBox = document.getElementById('chat-box');
-        if (chatBox) {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    });
-</script>
 </body>
 </html>
