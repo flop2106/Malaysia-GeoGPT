@@ -37,6 +37,7 @@ class Embedding(BaseLLM):
         try:
             for message in consumer:
                 self.msg_queue.put(message)
+                consumer.commit()
         except KeyboardInterrupt:
             logger.info("Interrupted by user.")
         finally:
