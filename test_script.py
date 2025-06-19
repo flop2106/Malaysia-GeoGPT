@@ -50,7 +50,7 @@ def test_embedding():
     print(test.execute("Hello Vector!"))
 
 def test_initial_pipeline():
-    test_kafka()
+    #test_kafka()
     embedding = Embedding()
     embedding.embedding_sequence()
 

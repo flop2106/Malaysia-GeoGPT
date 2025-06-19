@@ -36,6 +36,7 @@ def consume_topics(
     else:
         consumer = KafkaConsumer(
             bootstrap_servers = bootstrap_servers,
+            group_id = group_id,
             value_deserializer = safe_json_deserializer,
             key_deserializer = lambda m: m.decode("utf-8") if m else None,
             enable_auto_commit = False,
