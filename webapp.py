@@ -42,7 +42,7 @@ def index():
             result_str = ""
             for res in results:
                 result_str += (
-                    f"title: {res[1]}author: {res[2]}url: {res[3]}"
+                    f"title: {res[1]}author: {res[3]}url: {res[2]}"
                     f"abstract: {res[4]}\n"
                 )
             prompt = f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
