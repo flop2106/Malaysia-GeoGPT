@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from LLM.VectorSearch import VectorSearch
 from LLM.Chat import Chat
+from Database.SqlLiteSetup import get_all
 
 app = Flask(__name__)
 app.secret_key = 'change-me'
@@ -12,8 +13,15 @@ ROLE = """a geology data calatog experts for malaysia. \
 
 def reset_session():
     session['history'] = []
-    session['results'] = None
+    session['result_ids'] = None
     session['last_answer'] = None
+
+
+def fetch_results(ids):
+    if not ids:
+        return []
+    condition = f"paper_id in ({','.join(map(str, ids))})"
+    return get_all("listpaper", condition)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -24,7 +32,7 @@ def index():
             reset_session()
             return redirect(url_for('index'))
         # follow-up question
-        if session.get('results') and 'interrogate' in request.form:
+        if session.get('result_ids') and 'interrogate' in request.form:
             interrogation = request.form.get('interrogation')
             previous = session.get('last_answer')
             chat = Chat()
@@ -38,7 +46,7 @@ def index():
         if query:
             vs = VectorSearch()
             results = vs.execute(query)
-            session['results'] = results
+            session['result_ids'] = [row[0] for row in results]
             result_str = ""
             for res in results:
                 result_str += (
@@ -52,7 +60,8 @@ def index():
             session['history'].append(('assistant', answer))
             session['last_answer'] = answer
             return redirect(url_for('index'))
-    return render_template('index.html', history=session.get('history'), results=session.get('results'))
+    results = fetch_results(session.get('result_ids'))
+    return render_template('index.html', history=session.get('history'), results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)
