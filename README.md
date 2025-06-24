@@ -1,4 +1,6 @@
 # Malaysia GeoGPT
+https://malaysiageogpt.pythonanywhere.com/
+
 
 Malaysia GeoGPT is a research assistant chatbot built with Python focused on Malaysian geology. It scrapes academic paper abstracts from Universiti Malaya (UM) and Universiti Teknologi PETRONAS (UTP), embeds them using OpenAI models and stores the vectors in SQLite for quick retrieval. Ask natural-language questions and the bot returns the most relevant snippets so you can jump straight to analysis.
 
