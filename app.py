@@ -75,7 +75,10 @@ def index():
             store['history'].append(('assistant', answer))
             store['last_answer'] = answer
             return redirect(url_for('index'))
-    return render_template('index.html', history=store.get('history'), results=store.get('results'))
+    return render_template('index.html',
+                           history=store.get('history'),
+                           results=store.get('results'),
+                           summary=store.get('last_answer'))
 
 if __name__ == '__main__':
     app.run(debug=True)
