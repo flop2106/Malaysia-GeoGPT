@@ -18,7 +18,8 @@ def _init_store(sid):
     SESSION_STORE[sid] = {
         'history': [],
         'results': None,
-        'last_answer': None
+        'last_answer': None,
+        'last_query': None
     }
 
 def reset_session():
@@ -60,11 +61,15 @@ def index():
             answer = chat.execute(prompt, ROLE)
             store['history'] = [('user', query), ('assistant', answer)]
             store['last_answer'] = answer
+            store['last_query'] = query
+
         return redirect(url_for('index'))
     return render_template(
         'index.html',
         results=store.get('results'),
         summary=store.get('last_answer'),
+        query=store.get('last_query'),
+
     )
 
 

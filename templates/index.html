@@ -33,6 +33,10 @@
 
 {% if summary %}
 <div class="container mt-5" style="max-width:800px;">
+    {% if query %}
+    <h6 class="mb-2">Query</h6>
+    <div class="mb-3" style="white-space: pre-wrap;">{{ query }}</div>
+    {% endif %}
     <h5>AI Summary</h5>
     <div style="white-space: pre-wrap;">{{ summary }}</div>
     <a href="{{ url_for('chat_page') }}" class="btn btn-secondary mt-3">Chat</a>
