@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from LLM.VectorSearch import VectorSearch
 from LLM.Chat import Chat
+from uuid import uuid4
+
+# In-memory store for session data to keep cookies small
+SESSION_STORE = {}
 
 app = Flask(__name__)
 app.secret_key = 'change-me'
@@ -10,17 +14,40 @@ ROLE = """a geology data calatog experts for malaysia. \
                        ENSURE AT THE BOTTOM OF YOUR RESPONSE ADD THE TITLE AND URL THAT YOU USE FOR REFERENCE. \
                        YOU ARE FOUND TO ALWAYS GET MIXED UP ON GEOGRAPHY LIKE SARAWAK IN PERAK. ENSURE YOU GOT THIS RIGHT WHEN GIVING ANSWER.\n                       """
 
+def _init_store(sid):
+    SESSION_STORE[sid] = {
+        'history': [],
+        'results': None,
+        'last_answer': None,
+        'last_query': None
+    }
+
+def reset_session():
+    sid = session.get('sid')
+    if sid and sid in SESSION_STORE:
+        del SESSION_STORE[sid]
+    sid = str(uuid4())
+    session['sid'] = sid
+    _init_store(sid)
+
+def _get_store():
+    sid = session.get('sid')
+    if not sid or sid not in SESSION_STORE:
+        reset_session()
+        sid = session['sid']
+    return SESSION_STORE[sid]
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    store = _get_store()
     if request.method == 'POST':
         query = request.form.get('query')
         if query:
             vs = VectorSearch()
             results = vs.execute(query)
-            results = [list(row) for row in results]
-            session['results'] = results
+            results = [tuple(row) for row in results]
+            store['results'] = results
             result_str = ""
             for res in results:
                 result_str += (
@@ -32,30 +59,31 @@ def index():
             )
             chat = Chat()
             answer = chat.execute(prompt, ROLE)
-            session['history'] = [['user', query], ['assistant', answer]]
-            session['last_answer'] = answer
-            session['last_query'] = query
+            store['history'] = [('user', query), ('assistant', answer)]
+            store['last_answer'] = answer
+            store['last_query'] = query
 
         return redirect(url_for('index'))
     return render_template(
         'index.html',
-        results=session.get('results'),
-        summary=session.get('last_answer'),
-        query=session.get('last_query'),
+        results=store.get('results'),
+        summary=store.get('last_answer'),
+        query=store.get('last_query'),
 
     )
 
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat_page():
+    store = _get_store()
     if request.method == 'POST':
         if 'query' in request.form:
             query = request.form.get('query')
             if query:
                 vs = VectorSearch()
                 results = vs.execute(query)
-                results = [list(row) for row in results]
-                session['results'] = results
+                results = [tuple(row) for row in results]
+                store['results'] = results
                 result_str = ""
                 for res in results:
                     result_str += (
@@ -67,26 +95,22 @@ def chat_page():
                 )
                 chat = Chat()
                 answer = chat.execute(prompt, ROLE)
-                history = session.get('history', [])
-                history.append(['user', query])
-                history.append(['assistant', answer])
-                session['history'] = history
-                session['last_answer'] = answer
+                store['history'].append(('user', query))
+                store['history'].append(('assistant', answer))
+                store['last_answer'] = answer
         elif 'interrogate' in request.form:
             interrogation = request.form.get('interrogation')
-            previous = session.get('last_answer')
+            previous = store.get('last_answer')
             chat = Chat()
             answer = chat.execute(interrogation, ROLE, previous)
-            history = session.get('history', [])
-            history.append(['user', interrogation])
-            history.append(['assistant', answer])
-            session['history'] = history
-            session['last_answer'] = answer
+            store['history'].append(('user', interrogation))
+            store['history'].append(('assistant', answer))
+            store['last_answer'] = answer
         return redirect(url_for('chat_page'))
     return render_template(
         'chat.html',
-        history=session.get('history'),
-        results=session.get('results'),
+        history=store.get('history'),
+        results=store.get('results'),
     )
 
 
