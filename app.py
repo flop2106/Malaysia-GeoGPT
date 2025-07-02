@@ -41,25 +41,10 @@ def _get_store():
 def index():
     store = _get_store()
     if request.method == 'POST':
-        if 'reset' in request.form:
-            reset_session()
-            return redirect(url_for('index'))
-        # follow-up question
-        if store.get('results') and 'interrogate' in request.form:
-            interrogation = request.form.get('interrogation')
-            previous = store.get('last_answer')
-            chat = Chat()
-            answer = chat.execute(interrogation, ROLE, previous)
-            store['history'].append(('user', interrogation))
-            store['history'].append(('assistant', answer))
-            store['last_answer'] = answer
-            return redirect(url_for('index'))
-        # new query
         query = request.form.get('query')
         if query:
             vs = VectorSearch()
             results = vs.execute(query)
-            # Convert SQLAlchemy Row objects to tuples so they can be stored in the session
             results = [tuple(row) for row in results]
             store['results'] = results
             result_str = ""
@@ -68,14 +53,60 @@ def index():
                     f"title: {res[1]}author: {res[3]}url: {res[2]}"
                     f"abstract: {res[4]}\n"
                 )
-            prompt = f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
+            prompt = (
+                f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
+            )
             chat = Chat()
             answer = chat.execute(prompt, ROLE)
-            store['history'].append(('user', query))
+            store['history'] = [('user', query), ('assistant', answer)]
+            store['last_answer'] = answer
+        return redirect(url_for('index'))
+    return render_template(
+        'index.html',
+        results=store.get('results'),
+        summary=store.get('last_answer'),
+    )
+
+
+@app.route('/chat', methods=['GET', 'POST'])
+def chat_page():
+    store = _get_store()
+    if request.method == 'POST':
+        if 'query' in request.form:
+            query = request.form.get('query')
+            if query:
+                vs = VectorSearch()
+                results = vs.execute(query)
+                results = [tuple(row) for row in results]
+                store['results'] = results
+                result_str = ""
+                for res in results:
+                    result_str += (
+                        f"title: {res[1]}author: {res[3]}url: {res[2]}"
+                        f"abstract: {res[4]}\n"
+                    )
+                prompt = (
+                    f"Based on the following data: {result_str} + summarize and answer the following query from the user: {query}"
+                )
+                chat = Chat()
+                answer = chat.execute(prompt, ROLE)
+                store['history'].append(('user', query))
+                store['history'].append(('assistant', answer))
+                store['last_answer'] = answer
+        elif 'interrogate' in request.form:
+            interrogation = request.form.get('interrogation')
+            previous = store.get('last_answer')
+            chat = Chat()
+            answer = chat.execute(interrogation, ROLE, previous)
+            store['history'].append(('user', interrogation))
             store['history'].append(('assistant', answer))
             store['last_answer'] = answer
-            return redirect(url_for('index'))
-    return render_template('index.html', history=store.get('history'), results=store.get('results'))
+        return redirect(url_for('chat_page'))
+    return render_template(
+        'chat.html',
+        history=store.get('history'),
+        results=store.get('results'),
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Malaysia GeoGPT Chat</title>
+</head>
+<body>
+<div class="container-fluid py-4">
+    <h1 class="text-center mb-4">Malaysia GeoGPT Chat</h1>
+    <form method="post" action="{{ url_for('index') }}" class="mb-4">
+        <div class="input-group">
+            <input type="text" id="query" name="query" class="form-control" placeholder="Search geology papers..." required>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="border rounded p-3 mb-3" id="chat-box" style="height:50vh; overflow-y:auto;">
+                {% if history %}
+                    {% for role, content in history %}
+                        <div class="mb-2">
+                            <span class="fw-bold text-primary">{{ role.capitalize() }}:</span>
+                            <div style="white-space: pre-wrap;" class="d-inline">{{ content }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Ask a question to begin.</p>
+                {% endif %}
+            </div>
+            <form method="post" class="mb-2">
+                <div class="mb-3">
+                    <label for="interrogation" class="form-label">Ask a follow up question</label>
+                    <input type="text" class="form-control" id="interrogation" name="interrogation" required>
+                </div>
+                <button type="submit" name="interrogate" class="btn btn-primary">Ask</button>
+            </form>
+        </div>
+        <div class="col-md-4 border-start">
+            <h5>Search Results</h5>
+            <ol class="ps-3">
+                {% if results %}
+                    {% for row in results %}
+                        <li class="mb-3">
+                            <a href="{{ row[3] }}" target="_blank" class="fw-semibold">{{ row[1] }}</a><br>
+                            <small class="text-muted">Author: {{ row[2] }}</small>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="text-muted">No results yet.</li>
+                {% endif %}
+            </ol>
+        </div>
+    </div>
+</div>
+</body>
+</html>
