@@ -108,5 +108,6 @@ def chat_page():
         results=store.get('results'),
     )
 
+
 if __name__ == '__main__':
     app.run(debug=True)
