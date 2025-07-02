@@ -18,7 +18,7 @@
         <div class="input-group input-group-lg mb-3">
             <input type="text" id="query" name="query" class="form-control" placeholder="Search geology papers..." required>
             <button type="submit" class="btn btn-primary">Search</button>
-            <button type="submit" name="reset" class="btn btn-secondary" formnovalidate>Reset</button>
+
         </div>
     </form>
     <div class="text-start mx-auto" style="max-width:600px;">
@@ -28,18 +28,15 @@
         • What are the main fault zones in Peninsular Malaysia?<br>
         • Provide summary about Belait formation<br>
         • Which papers discuss on seismic interpretation and attributes?</p>
-        <p class="text-muted">Use the <strong>Reset</strong> button to clear the chat and run a new vector search so GPT can analyze fresh results.</p>
     </div>
 </div>
 
 {% if summary %}
 <div class="container mt-5" style="max-width:800px;">
     <h5>AI Summary</h5>
-    <p>{{ summary }}</p>
-    <form method="post" class="d-flex mb-4">
-        <input type="text" name="interrogation" class="form-control me-2" placeholder="Ask a follow-up question" required>
-        <button type="submit" name="interrogate" class="btn btn-primary">Chat</button>
-    </form>
+    <div style="white-space: pre-wrap;">{{ summary }}</div>
+    <a href="{{ url_for('chat_page') }}" class="btn btn-secondary mt-3">Chat</a>
+
 </div>
 {% endif %}
 
