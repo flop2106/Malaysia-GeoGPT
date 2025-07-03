@@ -2,12 +2,17 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from LLM.VectorSearch import VectorSearch
 from LLM.Chat import Chat
 from uuid import uuid4
+from dotenv import load_dotenv
+import os
 
 # In-memory store for session data to keep cookies small
 SESSION_STORE = {}
 
 app = Flask(__name__)
-app.secret_key = 'change-me'
+
+env_path = ".env"
+load_dotenv(dotenv_path = env_path)
+app.secret_key = os.getenv('flask_secret_key')
 
 ROLE = """a geology data calatog experts for malaysia. \
                        ONLY USE THE DATA PROVIDED AND AVOID USE YOUR OWN KNOWLEDGE UNLESS ASKED BY USER. \
