@@ -34,7 +34,7 @@ class VectorSearch(BaseLLM):
         super().__init__()
 
     def vector_search(self, query_embedding: list, embeddings_table: list,
-                      top_k: int = 10) -> list:
+                      top_k: int = 50) -> list:
         """
         Compute cosine similarity and return top_k paper id
         """

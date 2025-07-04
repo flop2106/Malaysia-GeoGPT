@@ -18,6 +18,8 @@ def test_kafka():
     working_server = setup()
     kafkaPublisher = setupPublisher(list_server = [working_server])
     um_xml = r"https://eprints.um.edu.my/cgi/exportview/subjects/QE/RSS2/QE.xml"
+    ums_xml = r"https://eprints.ums.edu.my/cgi/exportview/subjects/QE/RSS2/QE.xml"
+    utm_xml = r"https://eprints.utm.my/cgi/exportview/subjects/QE/RSS2/QE.xml"
     utp_xml = r"https://utpedia.utp.edu.my/cgi/exportview/subjects/QE/RSS2/QE.xml"
 
 
@@ -30,16 +32,30 @@ def test_kafka():
         target = scrapper,
         args = (um_xml, UMWebScrapper())
     )
+
+    ums_scrapper_thread = threading.Thread(
+        target = scrapper,
+        args = (ums_xml, UMWebScrapper())
+    )
+
+    utm_scrapper_thread = threading.Thread(
+        target = scrapper,
+        args = (utm_xml, UMWebScrapper())
+    )
+
     utp_scrapper_thread = threading.Thread(
         target = scrapper,
         args = (utp_xml, UTPWebScrapper())
     )
 
-    um_scrapper_thread.start() 
-
+    um_scrapper_thread.start()
+    ums_scrapper_thread.start()
+    utm_scrapper_thread.start()
     utp_scrapper_thread.start()
 
     um_scrapper_thread.join()
+    ums_scrapper_thread.join()
+    utm_scrapper_thread.join()
     utp_scrapper_thread.join()
 
 def test_LLM():
@@ -93,7 +109,7 @@ def test_vector_search_and_summarize():
     print(chat.execute(str(input("Add your interrogation: ")), role, result))
 
 
-    
-
+test_query()    
+#test_initial_pipeline()
 test_vector_search_and_summarize()
 #test_initial_pipeline()

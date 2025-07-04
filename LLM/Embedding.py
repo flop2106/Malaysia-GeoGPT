@@ -63,7 +63,7 @@ class Embedding(BaseLLM):
         logger.info("Inserting into SQLLite")
         try:
             PaperTable.insert_paper(data['title'],
-                                        data['authors'].replace(",",""),
+                                        data['authors'],
                                         data['url'],
                                         data['abstract']
                                         
