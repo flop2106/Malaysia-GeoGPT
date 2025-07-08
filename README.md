@@ -5,13 +5,13 @@ https://malaysiageogpt.pythonanywhere.com/
 Malaysia GeoGPT is a research assistant chatbot built with Python focused on Malaysian geology. It scrapes academic paper abstracts from Universiti Malaya (UM), Universiti Malaysia Sabah (UMS), Universiti Teknologi Malaysia (UTM), Universiti Malaysia Kelatan (UMK) and Universiti Teknologi PETRONAS (UTP), embeds them using OpenAI models and stores the vectors in SQLite for quick retrieval. Ask natural-language questions and the bot returns the most relevant snippets so you can jump straight to analysis.
 
 ## Features
-- **Automated scraping** of UM & UTP RSS feeds for geology papers
+- **Automated scraping** of UM, UMS, UMK, UTM & UTP RSS feeds for geology papers
 - **OpenAI embeddings** stored in a SQLite vector store with cosine similarity search
 - **Flask chat API** that summarizes retrieved abstracts using a RAG-style approach
 - **Kafka message queue** connects scraping and embedding steps for stability
 
 ## Architecture
-1. **Web scraper** → collects abstracts from UM & UTP
+1. **Web scraper** → collects abstracts from UM, UMS, UMK, UTM & UTP
 2. **Kafka queue** → hands data to the embedding worker
 3. **Embedding layer** → generates vector embeddings with OpenAI
 4. **SQLite + cosine similarity** → provides vector search
